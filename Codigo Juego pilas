@@ -1,0 +1,413 @@
+# coding: utf-8
+import pilasengine
+import random
+
+puntos = 0
+
+pilas = pilasengine.iniciar()
+               
+
+         
+#########################
+## ---------------Actores--------------- ##
+#########################
+class Puckman(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = 'Puckman.png'
+        self.x = -285
+        self.y = -210
+        self.escala = 0.2
+        self.radio_de_colision = 23 
+        self.aprender("limitadoabordesdepantalla")
+        self.aprender("puedeexplotar")
+        self.aprender("disparar", municion = 'pon')
+        
+    def actualizar(self):
+        if pilas.control.izquierda:
+            self.x -= 5
+            self.espejado = True
+        if pilas.control.derecha:
+            self.x += 5
+            self.espejado = False
+        if pilas.control.abajo:
+            self.y -= 5
+            self.espejado = True
+        if pilas.control.arriba:
+            self.y += 5
+            self.espejado = False
+            
+class PuckmanSuperior(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = 'Puckman.png'
+        self.x = -285
+        self.y = -210
+        self.escala = 0.2
+        self.radio_de_colision = 23 
+        self.aprender("limitadoabordesdepantalla")
+        self.aprender("puedeexplotar")
+        self.aprender("disparar", municion = 'pon')
+        
+    def actualizar(self):
+        if pilas.control.izquierda:
+            self.x -= 5
+            self.espejado = True
+        if pilas.control.derecha:
+            self.x += 5
+            self.espejado = False
+        if pilas.control.abajo:
+            self.y -= 5
+            self.espejado = True
+        if pilas.control.arriba:
+            self.y += 5
+            self.espejado = False
+        if self.x > 80:
+            self.x = -285
+                                                           
+class Plus(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = pilas.imagenes.cargar('GooglePlus.png')
+        self.radio_de_colision = 20
+        self.escala = 0.15
+        self.x = 100
+        self.y = random.randint(-100,100)
+        self.pilas.utils.interpolar(self, 'x', -365, duracion=5, tipo='gradual')
+        if self.x == -300:
+            self.eliminar()
+
+class PuckmanPlus(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = 'PuckmanPlus.png'
+        self.x = self.x
+        self.y = self.y
+        self.escala = 0.2
+        self.radio_de_colision = 23 
+        self.aprender("puedeexplotar")
+        self.aprender("disparar", municion = 'pon')
+
+class DestructorPlus(pilasengine.actores.ActorInvisible):
+    
+    def iniciar(self):
+        self.x = 300
+        self.barraPP = pilas.actores.Energia(50,225,progreso=100, ancho=500, alto=10, color_relleno = pilasengine.colores.verde)
+            
+    def actualizar(self):
+        self.barraPP.progreso=self.barraPP.progreso - 1
+        if self.barraPP.progreso==0:
+            self.x = 0
+            self.barraPP.eliminar()
+            self.figura_de_colision = pilas.fisica.Rectangulo(0, 0, 666, 666, sensor=True, dinamica=False)
+                                                           
+class pon(pilasengine.actores.Actor):
+    #Objeto a lanzar
+    def iniciar(self):
+        self.imagen = 'Nepe.png'
+        self.figura_de_colision = pilas.fisica.Rectangulo(-285, -210, 17, 45, sensor=True, dinamica=False)
+            
+    def actualizar(self):
+        self.figura_de_colision.x = self.x
+        self.figura_de_colision.y = self.y
+        if self.x > 300:
+            self.eliminar()
+            self.figura_de_colision.eliminar()
+
+class Zukaritas(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = 'Zukaritas.png'
+        self.escala = 0.35
+        self.y = 270
+        self.x = random.randint(-300, 300)
+        self.figura_de_colision = pilas.fisica.Rectangulo(self.x, self.y, 40, 80, sensor=True, dinamica=False)
+            
+    def actualizar(self):
+        self.y -= 5
+        if self.y <= -230:
+            self.eliminar()
+            
+class ZukaritasBoss(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = 'Zukaritas_Boss.png'
+        self.escala = 0.65
+        self.centro = ('derecha', 'centro')
+        self.x = 319
+        self.aprender("limitadoabordesdepantalla")
+        self.controles()
+        self.figura_de_colision = pilas.fisica.Rectangulo(self.x, self.y, 180, 400, sensor=True, dinamica=False)
+        
+    def controles(self):
+        teclas = {
+            pilas.simbolos.w: 'arriba',
+            pilas.simbolos.s: 'abajo',
+        }
+        mi_control = pilas.control.Control(teclas)
+        self.aprender(pilas.habilidades.MoverseConElTeclado, control=mi_control)
+   
+class BanBoss(pilasengine.actores.Actor):
+                         
+    def iniciar(self):
+        self.imagen = pilas.imagenes.cargar('Ban_DX.png')
+        self.radio_de_colision = 35
+        self.escala = 0.25
+        self.x = 195
+        self.y = -120
+        self.aprender( pilas.habilidades.PuedeExplotarConHumo )
+        self.pilas.utils.interpolar(self, 'x', -365, duracion=1, tipo='lineal')
+        self.pilas.utils.interpolar(self, 'y', random.randint(-300, 300), duracion=1, tipo='lineal')
+            
+    def actualizar(self):
+        self.rotacion += 25
+    
+class Holk(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = 'Holk.png'
+        self.escala = 0.17
+        self.radio_de_colision = 17
+        self.aprender( pilas.habilidades.PuedeExplotarConHumo )
+        self.izquierda = 300
+        self.y = random.randint(-210,50)
+        
+    def actualizar(self):
+        self.x-=5
+        if self.x < -300:
+            self.eliminar()
+        if self.y < -300:
+            self.eliminar()    
+        
+##########################
+## ---------------Botones--------------- ##
+##########################
+class Boton_Nivel_1(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = 'Logo.png'
+        self.x = 0
+        self.y = -30
+        self.escala = 0.05
+        reiniciar_texto = pilas.interfaz.IngresoDeTexto("     Click en el zorro para iniciar o reiniciar.")
+        reiniciar_texto.x = 0
+        reiniciar_texto.y = -115
+        self.cuando_hace_click = self.escena_inicial
+        
+    def escena_inicial(self, evento):
+        self.pilas.escenas.Nivel_1()
+        
+class Boton_Nivel_2(pilasengine.actores.Actor):
+    
+    def iniciar(self):
+        self.imagen = 'Logo.png'
+        self.x = 0
+        self.y = -30
+        self.escala = 0.05
+        reiniciar_texto = pilas.interfaz.IngresoDeTexto("     Click en el zorro para iniciar o reiniciar.")
+        reiniciar_texto.x = 0
+        reiniciar_texto.y = -115
+        self.cuando_hace_click = self.escena_inicial
+        
+    def escena_inicial(self, evento):
+        self.pilas.escenas.Nivel_2()
+                                                                                
+###########################
+## ---------------Escenarios--------------- ##
+###########################
+class MenuInicio(pilasengine.escenas.Escena):
+    
+    def iniciar(self):
+        fondo_inicio = pilas.fondos.Fondo()
+        fondo_inicio.imagen = pilas.imagenes.cargar('Plus_SDLG.jpg')
+        fondo_inicio.x = 10
+        fondo_inicio.y = -55
+        fondo_inicio.escala = 1.3
+        self.boton()
+        
+    def boton(self):
+        pilas.actores.Boton_Nivel_1()    
+        
+class Nivel_1(pilasengine.escenas.Escena):
+
+    def iniciar(self):
+        global puntos
+        homunculus = pilas.fondos.Fondo()
+        homunculus.imagen = pilas.imagenes.cargar('Homunculus.png')
+        homunculus.escala = 0.37
+        texto = pilas.actores.Texto("Debes conseguir 100:")
+        texto.x = 0
+        texto.y = 225
+        self.puntaje = self.pilas.actores.Puntaje(150, 225, color=pilas.colores.blanco)
+        self.puntaje.definir(puntos)
+        self.pilas.actores.Puckman()
+         
+        self.pilas.tareas.siempre(0.5,self.crear_baneador)
+        self.pilas.tareas.siempre(1,self.crear_destru_rayo)
+        
+        self.pilas.colisiones.agregar('Puckman','Zukaritas', self.cuando_zukaritas_toca)
+        self.pilas.colisiones.agregar('pon','Holk', self.cuando_pon_toca)
+
+    def crear_baneador(self):
+        self.pilas.actores.Zukaritas()
+    def crear_destru_rayo(self):
+        self.pilas.actores.Holk()
+
+    def cuando_zukaritas_toca(self, puckman, zukaritas):
+        puckman.eliminar()
+        self.puntaje = 0
+        if self.puntaje == 0:
+            self.pilas.escena_actual().tareas.eliminar_todas()
+            self.pilas.escenas.Perdedor()
+    
+    def cuando_pon_toca(self, nepe, holk):
+        global puntos
+        holk.decir("booon")
+        holk.eliminar() 
+        puntos += 5
+        self.puntaje.aumentar(5)
+        if puntos == 100:
+                self.pilas.escena_actual().tareas.eliminar_todas()
+                self.pilas.escenas.Nivel_2()
+
+class Nivel_2(pilasengine.escenas.Escena):
+
+    def iniciar(self):
+        homunculus = pilas.fondos.Fondo()
+        homunculus.imagen = pilas.imagenes.cargar('Homunculus.png')
+        homunculus.escala = 0.37
+        self.barraP = pilas.actores.Energia(-260,225,progreso=100, ancho=100, alto=20, color_relleno = pilasengine.colores.verde)
+        self.barraZ = pilas.actores.Energia(0,-225,progreso=100, ancho=500, alto=20, color_relleno = pilasengine.colores.verde)
+        self.pilas.actores.PuckmanSuperior()
+        self.pilas.actores.ZukaritasBoss()
+        self.pilas.actores.Plus() 
+        
+        self.pilas.tareas.siempre(0.5,self.ban)
+        self.pilas.tareas.siempre(15,self.crear_mejora)
+        
+        self.pilas.colisiones.agregar('PuckmanSuperior','Plus', self.cuando_toca_plus)
+        self.pilas.colisiones.agregar('pon','ZukaritasBoss', self.cuando_pon_toca_zukaritas)
+        self.pilas.colisiones.agregar('PuckmanSuperior','BanBoss', self.cuando_toca_ban)
+        self.pilas.colisiones.agregar('PuckmanPlus','DestructorPlus', self.cuando_plus_termina)
+         
+    def destruye_plus(self):
+        self.pilas.actores.DestructorPlus()
+    def crear_mejora(self):
+        self.pilas.actores.Plus()    
+    def ban(self):
+        self.pilas.actores.BanBoss()  
+                
+    def cuando_toca_plus(self, puck, plus):
+        plus.eliminar()
+        puck.eliminar()
+        self.pilas.actores.PuckmanPlus()
+        self.pilas.actores.DestructorPlus()
+        self.barraZ.progreso=self.barraZ.progreso - 1.5
+        
+    def cuando_plus_termina(self, pplus, destructor):
+        pplus.eliminar()
+        destructor.eliminar()
+        self.pilas.actores.PuckmanSuperior()
+                
+    def cuando_pon_toca_zukaritas(self, pon, zukaritasboss):
+        pon.eliminar()
+        self.barraZ.progreso=self.barraZ.progreso - 1
+        if self.barraZ.progreso<=200:
+            self.barraZ.color_relleno=pilasengine.colores.amarillo
+        if self.barraZ.progreso<=100:
+            self.barraZ.color_relleno=pilasengine.colores.naranja
+        if self.barraZ.progreso<=50:
+            self.barraZ.color_relleno=pilasengine.colores.rojo
+        if self.barraZ.progreso<=0:
+            self.pilas.escena_actual().tareas.eliminar_todas()
+            self.pilas.escenas.Ganador()
+
+    def cuando_toca_ban(self, puckman, ban):
+        ban.eliminar()
+        self.barraP.progreso=self.barraP.progreso - 20
+        if self.barraP.progreso<=70:
+            self.barraP.color_relleno=pilasengine.colores.amarillo
+        if self.barraP.progreso<=50:
+            self.barraP.color_relleno=pilasengine.colores.naranja
+        if self.barraP.progreso<=30:
+            self.barraP.color_relleno=pilasengine.colores.rojo
+        if self.barraP.progreso<=0:
+            self.pilas.escena_actual().tareas.eliminar_todas()
+            self.pilas.escenas.Perdedor_x2()
+
+class Ganador(pilasengine.escenas.Escena):
+    
+    def iniciar(self):
+        fondo_ganador = pilas.fondos.Fondo()
+        fondo_ganador.imagen = pilas.imagenes.cargar('Ganar.png')
+        fondo_ganador.escala = 1
+        fondo_ganador.x = -150
+        texto = pilas.interfaz.Boton("FELICIDADES :v")
+        texto1 = pilas.interfaz.Boton("GANASTE")
+        texto2 = pilas.interfaz.Boton("-----------------------------------")
+        texto.color = pilas.colores.verdeoscuro
+        texto1.color = pilas.colores.marron
+        texto.y = 100
+        texto1.y = 40
+        texto2.y = -30
+        
+class Perdedor(pilasengine.escenas.Escena):
+    
+    def iniciar(self):
+        global puntos
+        puntos = 0
+        fondo_perdedor = pilas.fondos.Fondo()
+        fondo_perdedor.imagen = pilas.imagenes.cargar('Perder.jpg')
+        fondo_perdedor.escala = 3
+        fondo_perdedor.x = -17
+        texto = pilas.interfaz.Boton("PERDISTE !!!!!!!!!!!!!!!!!!!!!!")
+        texto3 = pilas.interfaz.Boton("GAME OVER >:v") 
+        texto.x = 0
+        texto.y = 180
+        texto3.x = 0
+        texto3.y = -180
+        self.pilas.actores.Boton_Nivel_1()
+
+class Perdedor_x2(pilasengine.escenas.Escena):
+    
+    def iniciar(self):
+        global puntos
+        puntos = 0
+        fondo_perdedor = pilas.fondos.Fondo()
+        fondo_perdedor.imagen = pilas.imagenes.cargar('Perder.jpg')
+        fondo_perdedor.escala = 3
+        fondo_perdedor.x = -17
+        texto = pilas.interfaz.Boton("PERDISTE !!!!!!!!!!!!!!!!!!!!!")
+        texto3 = pilas.interfaz.Boton("GAME OVER >:v") 
+        texto.x = 0
+        texto.y = 180
+        texto3.x = 0
+        texto3.y = -180
+        self.pilas.actores.Boton_Nivel_2()
+        
+#############################
+## ---------------Vinculaciones--------------- ##
+#############################
+pilas.escenas.vincular(MenuInicio)
+pilas.escenas.vincular(Nivel_1)
+pilas.escenas.vincular(Nivel_2)
+pilas.escenas.vincular(Ganador)
+pilas.escenas.vincular(Perdedor)
+pilas.escenas.vincular(Perdedor_x2)
+
+pilas.actores.vincular(Puckman)
+pilas.actores.vincular(PuckmanSuperior)
+pilas.actores.vincular(Plus)
+pilas.actores.vincular(PuckmanPlus)
+pilas.actores.vincular(DestructorPlus)
+pilas.actores.vincular(pon)
+pilas.actores.vincular(Zukaritas)
+pilas.actores.vincular(ZukaritasBoss)
+pilas.actores.vincular(BanBoss)
+pilas.actores.vincular(Holk)
+pilas.actores.vincular(Boton_Nivel_1)
+pilas.actores.vincular(Boton_Nivel_2)
+
+pilas.escenas.MenuInicio()
+
+pilas.ejecutar()
